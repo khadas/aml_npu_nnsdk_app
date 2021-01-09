@@ -34,7 +34,7 @@ void sdk_version(){
 
 void help(){
 	cout << "SDK version:" << sdkversion << endl;
-	cout << "Useage ./face_emotion_64x64 < path to face_emotion nb file>  < path to jpeg file> " << endl;
+	cout << "Useage ./body_pose_640x480 < path to body pose nb file>  < path to jpeg file> " << endl;
 }
 
 float Float16ToFloat32(const signed short* src , float* dst ,int lenth)

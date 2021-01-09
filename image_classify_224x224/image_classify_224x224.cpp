@@ -27,7 +27,7 @@ aml_config config;
 
 void help(){
 	cout << "SDK version:" << sdkversion << endl;
-	cout << "Useage ./image_classify_244 < path to image_classify nb file>  < path to jpeg file> " << endl;
+	cout << "Useage ./image_classify_224x224 < path to image_classify nb file>  < path to jpeg file> " << endl;
 }
 
 void process_top5_(float *buf, unsigned int num){
