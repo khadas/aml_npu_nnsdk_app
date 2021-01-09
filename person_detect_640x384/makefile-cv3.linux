@@ -1,0 +1,50 @@
+TARGET_NAME1 = person_detect_640x384_picture
+TARGET_NAME2 = person_detect_640x384_camera
+OBJ_DIR = cv3_output
+#INSTALL_DIR :=
+
+LIBS += -L$(NNSDK_DIR)/lib/lib64 -lnnsdk
+LIBS += -L$(OPENCV_ROOT)/lib -lopencv_core -lopencv_dnn -lopencv_imgproc -lopencv_core -lopencv_videoio -lopencv_imgcodecs -lopencv_highgui -lopencv_video
+LIBS += -L$(OPENCV_ROOT)/lib -llapack -lcblas -lblas -lgfortran -latlas -lOpenCL -lz -lm -lpthread
+
+INCLUDE += -I./include
+INCLUDE += -I$(OPENCV_ROOT)/modules/objdetect/include
+INCLUDE += -I$(OPENCV_ROOT)/modules/core/include
+INCLUDE += -I$(OPENCV_ROOT)/modules
+INCLUDE += -I$(OPENCV_ROOT)/modules/highgui/include
+INCLUDE += -I$(OPENCV_ROOT)/modules/imgcodecs/include
+INCLUDE += -I$(OPENCV_ROOT)/modules/videoio/include
+INCLUDE += -I$(OPENCV_ROOT)/modules/imgproc/include
+CXXFLAGS += -std=c++11 -std=gnu++11 -Wall -std=c++11 $(INCLUDE)
+
+CXX = $(TOOLCHAIN)/aarch64-linux-gnu-g++
+
+TARGET_OUTPUT1 = $(OBJ_DIR)/$(TARGET_NAME1) 
+TARGET_OUTPUT2 = $(OBJ_DIR)/$(TARGET_NAME2) 
+
+OBJECTS1 = $(OBJ_DIR)/person_detect_640x384_picture.o
+OBJECTS2 = $(OBJ_DIR)/person_detect_640x384_camera.o
+
+#############################################################################################################
+
+all: $(TARGET_OUTPUT1) $(TARGET_OUTPUT2)
+
+clean:
+	@rm -rf $(OBJ_DIR)/* $(OBJ_DIR)
+
+install: $(TARGET_OUTPUT)
+	@mkdir -p $(INSTALL_DIR)
+	@-cp $(TARGET_OUTPUT) $(INSTALL_DIR)
+
+$(TARGET_OUTPUT1): $(OBJECTS1)
+	@$(CXX) $(OBJECTS1) -o $(TARGET_OUTPUT1) $(LIBS)
+
+$(TARGET_OUTPUT2): $(OBJECTS2)
+	@$(CXX) $(OBJECTS2) -o $(TARGET_OUTPUT2) $(LIBS)
+
+$(OBJ_DIR)/%.o: %.cpp
+	@echo "  COMPILE $(abspath $<)"
+	@mkdir -p $(OBJ_DIR)
+	@$(CXX) -c $(CXXFLAGS) -o $@ $<
+
+
