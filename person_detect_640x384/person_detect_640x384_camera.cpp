@@ -29,6 +29,8 @@
 using namespace std;
 using namespace cv;
 
+int top1,left1,bat1,right1;
+
 static const char *sdkversion = "v1.6.2";
 static void *context = NULL;
 img_classify_out_t *cls_out = NULL;
@@ -183,12 +185,15 @@ void get_input_data_cv(const cv::Mat& sample, uint8_t* input_data, int img_h, in
 		cv::resize(img, img, cv::Size(w,h));
 	}
 
-	int top = (img_h - h)/2;
-	int bat = (img_h - h + 1)/2;
-	int left = (img_w - w)/2;
-	int right = (img_w - w + 1)/2;
+	cv::Mat img3(h,w,CV_8UC3);
+	cv::resize(img, img3, cv::Size(w,h));
 
-	cv::copyMakeBorder(img,img2,top,bat,left,right,cv::BORDER_CONSTANT,cv::Scalar(0,0,0));
+	top1 = (img_h - h)/2;
+	bat1 = (img_h - h + 1)/2;
+	left1 = (img_w - w)/2;
+	right1 = (img_w - w + 1)/2;
+
+	cv::copyMakeBorder(img,img2,top1,bat1,left1,right1,cv::BORDER_CONSTANT,cv::Scalar(0,0,0));
 
 	uint8_t* img_data = img2.data;
 	int hw = img_h * img_w;
@@ -246,7 +251,7 @@ int postpress_network(const cv::Mat& sample){
 		int i = 0;
 		for(i = 0; i < (int)pout->detNum; i++){
 			cout << "i:" << i << " x:" << pout->pBox[i].x << " w:" << pout->pBox[i].w << " y:" << pout->pBox[i].y << " h:" << pout->pBox[i].h << " score:" << pout->pBox[i].score <<endl;
-			cv::Rect rect(pout->pBox[i].x*img.cols, pout->pBox[i].y*img.rows, pout->pBox[i].w*img.cols, pout->pBox[i].h*img.rows);
+			cv::Rect rect((pout->pBox[i].x-(float)left1/640.0)*640.0/(640.0-2.0*(float)left1)*img.cols, (pout->pBox[i].y-(float)top1/384.0)*384.0/(384.0-2.0*(float)top1)*img.rows, pout->pBox[i].w*640.0/(640.0-2.0*(float)left1)*img.cols, pout->pBox[i].h*384.0/(384.0-2.0*(float)top1)*img.rows);
 			cv::rectangle(img,rect,cv::Scalar(255,0,0),2,2,0);
 		}
 	}
