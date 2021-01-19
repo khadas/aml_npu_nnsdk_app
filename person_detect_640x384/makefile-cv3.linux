@@ -5,7 +5,7 @@ OBJ_DIR = cv3_output
 
 LIBS += -L$(NNSDK_DIR)/lib/lib64 -lnnsdk
 LIBS += -L$(OPENCV_ROOT)/lib -lopencv_core -lopencv_dnn -lopencv_imgproc -lopencv_core -lopencv_videoio -lopencv_imgcodecs -lopencv_highgui -lopencv_video
-LIBS += -L$(OPENCV_ROOT)/lib -llapack -lcblas -lblas -lgfortran -latlas -lOpenCL -lz -lm -lpthread
+LIBS += -L$(OPENCV_ROOT)/lib -lz -lm -lpthread #-llapack -lcblas -lblas -lgfortran -latlas -lOpenCL -lz -lm -lpthread
 
 INCLUDE += -I./include
 INCLUDE += -I$(OPENCV_ROOT)/modules/objdetect/include
