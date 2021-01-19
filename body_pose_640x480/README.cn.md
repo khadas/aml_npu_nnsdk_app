@@ -2,8 +2,16 @@
 
 opencv3
 
+1. HOST:
+
 ```shell
 $ ./build-cv3.sh <path to aml_npu_sdk/linux_sdk/linux_sdk >
+```
+
+2. LOCAL:
+
+```shell
+$ ./build-cv3.sh
 ```
 
 ## 运行
