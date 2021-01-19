@@ -2,7 +2,7 @@ TARGET_NAME = image_classify_224x224
 OBJ_DIR = cv3_output
 #INSTALL_DIR :=
 
-LIBS += -L$(NNSDK_DIR)/lib/lib64 -lnnsdk
+LIBS += -L$(NNSDK_DIR) -lnnsdk
 LIBS += -L$(OPENCV_ROOT)/lib -lopencv_core -lopencv_dnn -lopencv_imgproc -lopencv_core -lopencv_videoio -lopencv_imgcodecs -lopencv_highgui -lopencv_video
 LIBS += -L$(OPENCV_ROOT)/lib -lz -lm #-llapack -lcblas -lblas -lgfortran -latlas -lOpenCL -lz -lm
 
@@ -16,13 +16,16 @@ INCLUDE += -I$(OPENCV_ROOT)/modules/videoio/include
 INCLUDE += -I$(OPENCV_ROOT)/modules/imgproc/include
 CXXFLAGS += -std=c++11 -std=gnu++11 -Wall -std=c++11 $(INCLUDE)
 
-CXX = $(TOOLCHAIN)/aarch64-linux-gnu-g++
+CXX = $(TOOLCHAIN)$(CROSS_COMPILE)g++
+CC = $(TOOLCHAIN)$(CROSS_COMPILE)gcc
 
 TARGET_OUTPUT = $(OBJ_DIR)/$(TARGET_NAME) 
 
 OBJECTS += $(OBJ_DIR)/image_classify_224x224.o
 
 #############################################################################################################
+
+LDFLAGS += -Wall -shared -Wl,-soname,$(TARGET_NAME) -Wl,-z,defs
 
 all: $(TARGET_OUTPUT)
 
@@ -40,5 +43,10 @@ $(OBJ_DIR)/%.o: %.cpp
 	@echo "  COMPILE $(abspath $<)"
 	@mkdir -p $(OBJ_DIR)
 	@$(CXX) -c $(CXXFLAGS) -o $@ $<
+
+$(OBJ_DIR)/%.o: %.c
+	@echo "  COMPILE $(abspath $<)"
+	@mkdir -p $(OBJ_DIR)
+	@$(CC) $(LDFLAGS) -c $(CFLAGS) -o $@ $<
 
 
