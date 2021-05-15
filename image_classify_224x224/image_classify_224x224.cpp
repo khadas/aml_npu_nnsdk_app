@@ -21,8 +21,10 @@ using namespace cv;
 
 static const char *sdkversion = "v1.6.2";
 static void *context = NULL;
+static unsigned char *inbuf = NULL;
 img_classify_out_t *cls_out = NULL;
 aml_config config;
+
 
 
 void help(){
@@ -30,35 +32,44 @@ void help(){
 	cout << "Useage ./image_classify_224x224 < path to image_classify nb file>  < path to jpeg file> " << endl;
 }
 
-void process_top5_(float *buf, unsigned int num){
+void process_top5_(float *buf,unsigned int num,img_classify_out_t* clsout)
+{
+    int j = 0;
+    unsigned int MaxClass[5]={0};
+    float fMaxProb[5]={0.0};
 
-	int i = 0,j = 0;
-   	unsigned int MaxClass[5]={0};
-	float fMaxProb[5]={0.0};
-	float *pfMaxProb = fMaxProb;
-	unsigned int *pMaxClass = MaxClass;
+    float *pfMaxProb = fMaxProb;
+    unsigned int  *pMaxClass = MaxClass,i = 0;
 
-	for (j = 0; j < 5; j++){
-		for (i=0; i<(int)num; i++){
-        	if ((i == (int)*(pMaxClass+0)) || (i == (int)*(pMaxClass+1)) || (i == (int)*(pMaxClass+2)) ||
-					(i == (int)*(pMaxClass+3)) || (i == (int)*(pMaxClass+4))){
-				continue;
-			}
-			if (buf[i] > *(pfMaxProb+j)){
-				*(pfMaxProb+j) = buf[i];
-				*(pMaxClass+j) = i;
-			}
-		}
-	}
-	for(i=0; i<5; i++){
-		if(cls_out == NULL){
-			cout << setw(3) << MaxClass[i] << ": " << setw(12) << setfill(' ') << setprecision(6) << fMaxProb[i] << endl;
-		}else{
-			cls_out->score[i] = fMaxProb[i];
-			cls_out->topClass[i] = MaxClass[i];
-		}
-	}
+    for (j = 0; j < 5; j++)
+    {
+        for (i=0; i<num; i++)
+        {
+            if ((i == *(pMaxClass+0)) || (i == *(pMaxClass+1)) || (i == *(pMaxClass+2)) ||
+                (i == *(pMaxClass+3)) || (i == *(pMaxClass+4)))
+            {
+                continue;
+            }
 
+            if (buf[i] > *(pfMaxProb+j))
+            {
+                *(pfMaxProb+j) = buf[i];
+                *(pMaxClass+j) = i;
+            }
+        }
+    }
+    for (i=0; i<5; i++)
+    {
+        if (clsout == NULL)
+        {
+            printf("%3d: %8.6f\n", MaxClass[i], fMaxProb[i]);
+        }
+        else
+        {
+            clsout->score[i] = fMaxProb[i];
+            clsout->topClass[i] = MaxClass[i];
+        }
+    }
 }
 
 float Float16ToFloat32(const signed short* src , float* dst ,int lenth)
@@ -176,6 +187,9 @@ int create_network(char *nbfile){
 	config.path = (const char *)nbfile;
 	config.nbgType = NN_NBG_FILE;
 	config.modelType = TENSORFLOW;
+	inbuf = aml_util_mallocAlignedBuffer(224*224*3);
+	config.inOut.inAddr[0] = inbuf;
+	config.typeSize = sizeof(aml_config);
 	context = aml_module_create(&config);	
 	return 0;
 }
@@ -248,17 +262,27 @@ int postpress_network(){
 
 	int i;
 	aml_output_config_t outconfig;
-	img_classify_out_t *pout = NULL;	
+	img_classify_out_t *pout = NULL;
+	aml_module_t modelType;
 
-	outconfig.mdType = IMAGE_CLASSIFY;
+	nn_output *outdata = NULL;
+
+//	outconfig.mdType = IMAGE_CLASSIFY;
+//	outconfig.format = AML_OUTDATA_FLOAT32;
+
+//	outdata =(img_classify_out_t *)aml_module_output_get(context,outconfig);
+
+//	cout << "----------Top5----------" << endl;
+//	for(i = 0; i < 5; i++){
+//		cout << "Top" << i+1 << " class:"<< outdata->topClass[i] << " score:" << pout->score[i] <<endl;
+//	}
+
+	outconfig.typeSize = sizeof(aml_output_config_t);
+	modelType = CUSTOM_NETWORK;
 	outconfig.format = AML_OUTDATA_FLOAT32;
+	outdata = (nn_output*)aml_module_output_get(context,outconfig);
 
-	pout =(img_classify_out_t *)aml_module_output_get(context,outconfig);
-
-	cout << "----------Top5----------" << endl;
-	for(i = 0; i < 5; i++){
-		cout << "Top" << i+1 << " class:"<< pout->topClass[i] << " score:" << pout->score[i] <<endl;
-	}
+	process_top5_((float*)outdata->out[0].buf,outdata->out[0].size/sizeof(float),NULL);
 
 	return 0;
 }
@@ -279,6 +303,7 @@ int main(int argc,char **argv){
 	preprocess_network(argv[2]);
 	postpress_network();
 	ret = aml_module_destroy(context);
+	if(inbuf)aml_util_freeAlignedBuffer(inbuf);
 
 	return ret;
 
