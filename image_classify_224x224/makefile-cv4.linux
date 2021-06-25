@@ -1,5 +1,5 @@
 TARGET_NAME = image_classify_224x224
-OBJ_DIR = cv3_output
+OBJ_DIR = cv4_output
 #INSTALL_DIR :=
 
 LIBS += -L$(NNSDK_DIR) -lnnsdk
@@ -9,7 +9,7 @@ LIBS += -L$(OPENCV_ROOT)/lib -lz -lm #-llapack -lcblas -lblas -lgfortran -latlas
 INCLUDE += -I./include
 INCLUDE += -I$(OPENCV_ROOT)/modules/objdetect/include
 INCLUDE += -I$(OPENCV_ROOT)/modules/core/include
-INCLUDE += -I$(OPENCV_ROOT)/modules
+INCLUDE += -I$(OPENCV_ROOT)/
 INCLUDE += -I$(OPENCV_ROOT)/modules/highgui/include
 INCLUDE += -I$(OPENCV_ROOT)/modules/imgcodecs/include
 INCLUDE += -I$(OPENCV_ROOT)/modules/videoio/include

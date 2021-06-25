@@ -198,7 +198,7 @@ int create_network(char *nbfile){
 void get_input_data_cv(char *jpegpath, uint8_t* input_data, int img_h, int img_w)
 {
 	int h,w;
-	cv::Mat img = cv::imread(jpegpath,CV_LOAD_IMAGE_COLOR);
+	cv::Mat img = cv::imread(jpegpath,cv::IMREAD_COLOR);
 	cv::Mat img2(img_h,img_w,CV_8UC3,cv::Scalar(0,0,0));
 
 	if((float)img.cols/(float)img_w > (float)img.rows/(float)img_h){
